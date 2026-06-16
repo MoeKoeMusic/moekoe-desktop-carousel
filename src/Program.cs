@@ -72,6 +72,7 @@ namespace DesktopCoverCarousel
         private int index = -1;
         private int requestId;
         private int preloadRequestId;
+        private bool desktopAttached;
 
         public WallpaperForm()
         {
@@ -118,10 +119,8 @@ namespace DesktopCoverCarousel
         {
             base.OnLoad(e);
 
-            DesktopHost.Attach(Handle);
             Rectangle screen = SystemInformation.VirtualScreen;
             SetBounds(0, 0, screen.Width, screen.Height);
-
             NativeCommandReader.Start(this);
             Hide();
         }
@@ -449,6 +448,7 @@ namespace DesktopCoverCarousel
                 fadeTimer.Stop();
                 if (!Visible)
                 {
+                    EnsureDesktopAttached();
                     Show();
                 }
                 Invalidate();
@@ -467,9 +467,23 @@ namespace DesktopCoverCarousel
             fadeTimer.Start();
             if (!Visible)
             {
+                EnsureDesktopAttached();
                 Show();
             }
             Invalidate();
+        }
+
+        private void EnsureDesktopAttached()
+        {
+            if (desktopAttached)
+            {
+                return;
+            }
+
+            DesktopHost.Attach(Handle);
+            Rectangle screen = SystemInformation.VirtualScreen;
+            SetBounds(0, 0, screen.Width, screen.Height);
+            desktopAttached = true;
         }
 
         private void UpdateFade()
@@ -508,7 +522,10 @@ namespace DesktopCoverCarousel
 
         private void OnFormClosed(object sender, FormClosedEventArgs e)
         {
-            DesktopHost.Restore();
+            if (desktopAttached)
+            {
+                DesktopHost.Restore();
+            }
         }
 
         private static Bitmap LoadFrame(string source, Size frameSize, ImageFitMode mode)
