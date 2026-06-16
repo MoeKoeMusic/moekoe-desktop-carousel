@@ -30,7 +30,19 @@ namespace DesktopCoverCarousel
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            Application.Run(new WallpaperForm());
+            Application.Run(new WallpaperApplicationContext());
+        }
+    }
+
+    internal sealed class WallpaperApplicationContext : ApplicationContext
+    {
+        private readonly WallpaperForm form;
+
+        public WallpaperApplicationContext()
+        {
+            form = new WallpaperForm();
+            form.FormClosed += delegate { ExitThread(); };
+            form.StartNativeHost();
         }
     }
 
@@ -115,14 +127,12 @@ namespace DesktopCoverCarousel
             get { return true; }
         }
 
-        protected override void OnLoad(EventArgs e)
+        public void StartNativeHost()
         {
-            base.OnLoad(e);
-
             Rectangle screen = SystemInformation.VirtualScreen;
             SetBounds(0, 0, screen.Width, screen.Height);
+            IntPtr handle = Handle;
             NativeCommandReader.Start(this);
-            Hide();
         }
 
         protected override void OnPaint(PaintEventArgs e)
