@@ -1,0 +1,104 @@
+html {
+  background: #f8fafc;
+}
+
+body {
+  box-sizing: border-box;
+  width: 360px;
+  margin: 0 auto;
+  padding: 16px;
+  font: 13px/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #1f2937;
+  background: #f8fafc;
+}
+
+h1 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  text-align: center;
+}
+
+.status {
+  margin: 0 0 12px;
+  padding: 10px;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.status div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+dt {
+  color: #6b7280;
+}
+
+dd {
+  margin: 0;
+  text-align: right;
+  font-weight: 600;
+}
+
+.field {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+input,
+select,
+button {
+  box-sizing: border-box;
+  width: 100%;
+  height: 32px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 0 8px;
+  font: inherit;
+  background: #fff;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.check input {
+  width: auto;
+  height: auto;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+
+button {
+  cursor: pointer;
+  color: #fff;
+  border-color: #2563eb;
+  background: #2563eb;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.error {
+  min-height: 18px;
+  margin: 10px 0 0;
+  color: #dc2626;
+}

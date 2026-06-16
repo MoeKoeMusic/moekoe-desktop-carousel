@@ -1,0 +1,48 @@
+{
+  "manifest_version": 3,
+  "name": "MoeKoe 桌面封面轮播",
+  "plugin_id": "moekoe-desktop-carousel",
+  "version": "1.0.0",
+  "minversion": "1.6.5",
+  "moekoe": true,
+  "description": "一个 MoeKoe Music Windows桌面封面轮播插件。",
+  "author": {
+    "name": "MoeKoe Music",
+    "url": "https://music.moekoe.cn/"
+  },
+  "permissions": ["storage"],
+  "host_permissions": [
+    "http://127.0.0.1:6521/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "http://localhost:8080/*",
+        "https://app.testnet.music.moekoe.cn/*",
+        "file:///*"
+      ],
+      "js": ["song-watcher.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "moekoe_permissions": ["moekoe:nativeHost"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "moekoe_native_hosts": [
+    {
+      "id": "desktop-cover-carousel",
+      "platforms": {
+        "win32": {
+          "path": "bin/DesktopCoverCarousel.exe",
+          "args": []
+        }
+      },
+      "auto_start": true,
+      "bridge": "native-bridge.html"
+    }
+  ]
+}

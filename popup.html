@@ -1,0 +1,68 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>桌面封面轮播</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <h1>桌面封面轮播</h1>
+
+  <dl class="status">
+    <div><dt>本地程序</dt><dd id="hostStatus">-</dd></div>
+    <div><dt>本地缓存</dt><dd id="moekoeStatus">-</dd></div>
+    <div><dt>当前歌曲</dt><dd id="songStatus">-</dd></div>
+    <div><dt>封面数量</dt><dd id="imageStatus">-</dd></div>
+  </dl>
+
+  <label class="field">
+    <span>接口地址</span>
+    <input id="apiBaseUrl" type="text" spellcheck="false">
+  </label>
+  <div class="grid">
+    <label class="field">
+      <span>间隔(秒)</span>
+      <input id="intervalSeconds" type="number" min="3" max="60">
+    </label>
+    <label class="field">
+      <span>淡入(ms)</span>
+      <input id="fadeMilliseconds" type="number" min="0" max="5000">
+    </label>
+  </div>
+  <div class="grid">
+    <label class="field">
+      <span>最多图片</span>
+      <input id="maxImages" type="number" min="1" max="30">
+    </label>
+    <label class="field">
+      <span>显示方式</span>
+      <select id="fit">
+        <option value="cover">填满</option>
+        <option value="contain">完整</option>
+      </select>
+    </label>
+  </div>
+  <label class="check">
+    <input id="enabled" type="checkbox">
+    <span>启用轮播</span>
+  </label>
+  <label class="check">
+    <input id="shuffle" type="checkbox">
+    <span>随机顺序</span>
+  </label>
+
+  <div class="actions">
+    <button id="saveBtn">保存</button>
+    <button id="refreshBtn">刷新</button>
+    <button id="reconnectBtn">重新读取</button>
+  </div>
+  <div class="actions">
+    <button id="previousBtn">上一张</button>
+    <button id="nextBtn">下一张</button>
+    <button id="clearBtn">清空桌面</button>
+  </div>
+
+  <p id="error" class="error"></p>
+  <script src="popup.js"></script>
+</body>
+</html>
