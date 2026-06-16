@@ -11,9 +11,7 @@
     "url": "https://music.moekoe.cn/"
   },
   "permissions": ["storage"],
-  "host_permissions": [
-    "http://127.0.0.1:6521/*"
-  ],
+  "host_permissions": ["http://127.0.0.1:6521/*"],
   "content_scripts": [
     {
       "matches": [
@@ -44,5 +42,8 @@
       "auto_start": true,
       "bridge": "native-bridge.html"
     }
-  ]
+  ],
+  "icons": {
+    "128": "icons/icon128.png"
+  }
 }
