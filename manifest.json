@@ -3,7 +3,7 @@
   "name": "MoeKoe 桌面封面轮播",
   "plugin_id": "moekoe-desktop-carousel",
   "version": "1.0.0",
-  "minversion": "1.6.5",
+  "minversion": "1.6.6",
   "moekoe": true,
   "description": "一个 MoeKoe Music Windows桌面封面轮播插件。",
   "author": {
