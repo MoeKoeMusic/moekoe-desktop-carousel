@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "MoeKoe 桌面封面轮播",
   "plugin_id": "moekoe-desktop-carousel",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "minversion": "1.6.6",
   "moekoe": true,
   "description": "一个 MoeKoe Music Windows桌面封面轮播插件。",
@@ -11,7 +11,10 @@
     "url": "https://music.moekoe.cn/"
   },
   "permissions": ["storage"],
-  "host_permissions": ["http://127.0.0.1:6521/*"],
+  "host_permissions": [
+    "http://127.0.0.1:6521/*",
+    "https://openapicdnretry.kugou.com/*"
+  ],
   "content_scripts": [
     {
       "matches": [
