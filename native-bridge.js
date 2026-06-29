@@ -15,7 +15,7 @@ const port = chrome.runtime.connect({ name: "moekoe-desktop-carousel" });
 
 let settings = { ...DEFAULT_SETTINGS };
 let lastImageSignature = "";
-let lastHash = "";
+let lastSongSignature = "";
 let watcherLastSeen = 0;
 
 const state = {
@@ -23,6 +23,7 @@ const state = {
   hostRunning: false,
   currentHash: "",
   currentSongName: "",
+  currentAuthor: "",
   imageCount: 0,
   lastFetchAt: "",
   lastError: "",
@@ -84,24 +85,28 @@ async function handleCurrentSong(song) {
     return;
   }
 
-  const hash = String(song.hash || "");
-  if (!hash || hash.startsWith("local_")) {
+  const author = String(song.author || "").trim();
+  if (!author) {
     keepCurrentBackground(song.displayName || song.name || "");
     return;
   }
 
-  if (hash === lastHash) return;
+  const hash = String(song.hash || "");
+  const signature = `${hash}\n${author}`;
+  if (signature === lastSongSignature) return;
 
-  lastHash = hash;
+  lastSongSignature = signature;
   state.currentHash = hash;
   state.currentSongName = song.displayName || song.name || "";
-  await loadSongImages(hash);
+  state.currentAuthor = author;
+  await loadSongImages(author);
 }
 
 function keepCurrentBackground(songName = "") {
-  lastHash = "";
+  lastSongSignature = "";
   state.currentHash = "";
   state.currentSongName = songName;
+  state.currentAuthor = "";
   emitStatus();
 }
 
@@ -109,11 +114,11 @@ function refreshWatcherStatus() {
   state.cacheWatcherConnected = watcherLastSeen > 0 && Date.now() - watcherLastSeen < WATCHER_STALE_MS;
 }
 
-async function loadSongImages(hash) {
+async function loadSongImages(author) {
   if (!settings.enabled) return;
 
   try {
-    const images = await fetchSongImages(hash);
+    const images = await fetchAuthorImages(author);
     const signature = images.join("\n");
     state.imageCount = images.length;
     state.lastFetchAt = new Date().toLocaleString();
@@ -143,8 +148,14 @@ async function loadSongImages(hash) {
   emitStatus();
 }
 
-async function fetchSongImages(hash) {
-  const url = `${settings.apiBaseUrl.replace(/\/+$/, "")}/images?hash=${encodeURIComponent(hash)}`;
+async function fetchAuthorImages(author) {
+  const authorId = await fetchAuthorId(author);
+  const params = new URLSearchParams({
+    fields_pack: "allimages",
+    authorimg_type: "2,3",
+    entity_id: authorId
+  });
+  const url = `https://openapicdnretry.kugou.com/kmr/v1/author/extend?${params}`;
   const response = await fetch(url, {
     headers: {
       "Accept": "application/json"
@@ -156,23 +167,44 @@ async function fetchSongImages(hash) {
   }
 
   const payload = await response.json();
-  return extractImages(payload).slice(0, settings.maxImages);
+  return extractAuthorImages(payload).slice(0, settings.maxImages);
 }
 
-function extractImages(payload) {
+async function fetchAuthorId(author) {
+  const params = new URLSearchParams({
+    keywords: author,
+    type: "author"
+  });
+  const url = `${settings.apiBaseUrl.replace(/\/+$/, "")}/search?${params}`;
+  const response = await fetch(url, {
+    headers: {
+      "Accept": "application/json"
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error(`歌手接口请求失败: ${response.status}`);
+  }
+
+  const payload = await response.json();
+  const authors = Array.isArray(payload?.data?.lists) ? payload.data.lists : [];
+  const matched = authors.find((item) => item?.AuthorName === author) || authors[0];
+  const authorId = matched?.AuthorId || matched?.author_id || matched?.id;
+
+  if (!authorId) {
+    throw new Error(`未找到歌手: ${author}`);
+  }
+
+  return String(authorId);
+}
+
+function extractAuthorImages(payload) {
   const images = [];
   const groups = Array.isArray(payload?.data) ? payload.data : [];
 
   groups.forEach((group) => {
-    const authors = Array.isArray(group?.author) ? group.author : [];
-    const albums = Array.isArray(group?.album) ? group.album : [];
-
-    authors.forEach((author) => {
-      images.push(...collectImageUrls(author?.imgs));
-    });
-    albums.forEach((album) => {
-      images.push(...collectImageUrls(album?.imgs));
-    });
+    images.push(...collectImageUrls(group?.imgs));
+    images.push(...collectImageUrls(group?.base?.avatar));
   });
 
   return [...new Set(images)];
@@ -183,6 +215,12 @@ function collectImageUrls(imgs) {
   const visit = (value) => {
     if (!value) return;
 
+    if (typeof value === "string") {
+      const url = normalizeImageUrl(value);
+      if (url) urls.push(url);
+      return;
+    }
+
     if (Array.isArray(value)) {
       value.forEach(visit);
       return;
@@ -190,6 +228,7 @@ function collectImageUrls(imgs) {
 
     if (typeof value === "object") {
       const url = normalizeImageUrl(
+        value.file ||
         value.sizable_portrait ||
         value.sizable_cover ||
         value.url ||
@@ -222,9 +261,9 @@ async function runCommand(action) {
   }
 
   if (action === "refresh") {
-    if (state.currentHash) {
+    if (state.currentAuthor) {
       lastImageSignature = "";
-      await loadSongImages(state.currentHash);
+      await loadSongImages(state.currentAuthor);
     }
     return getStatus();
   }
@@ -244,9 +283,9 @@ async function updateSettings(partial) {
     return;
   }
 
-  if (state.currentHash) {
+  if (state.currentAuthor) {
     lastImageSignature = "";
-    await loadSongImages(state.currentHash);
+    await loadSongImages(state.currentAuthor);
   }
 }
 
